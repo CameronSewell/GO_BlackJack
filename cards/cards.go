@@ -1,4 +1,4 @@
-package main
+package cards
 
 /**
  * Defines what makes up a card including value, suit, and symbol. Including some helper methods
