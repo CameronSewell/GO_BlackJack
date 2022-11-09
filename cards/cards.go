@@ -8,8 +8,13 @@ import (
 	"fmt"
 )
 
+type CardValue int
+
+const CardValues int = 14
+const Suits int = 4
+
 const (
-	CARD_ONE = iota
+	CARD_ONE CardValue = iota
 	CARD_TWO
 	CARD_THREE
 	CARD_FOUR
@@ -45,11 +50,31 @@ type Card struct {
 	Value int
 }
 
+func getSuit(Suit int) rune {
+	var suit rune
+	switch Suit {
+	default:
+	case 0:
+		suit = SUIT_SPADES
+		break
+	case 1:
+		suit = SUIT_HEARTS
+		break
+	case 2:
+		suit = SUIT_DIAMONDS
+		break
+	case 3:
+		suit = SUIT_CLUBS
+		break
+	}
+	return suit
+}
+
 // Formats a playing card
 func (card Card) String() string {
 	var symbol string
 
-	switch card.Symbol {
+	switch CardValue(card.Symbol) {
 	default:
 		symbol = fmt.Sprintf("%d", card.Value)
 	case CARD_JACK:
@@ -74,7 +99,7 @@ func NewCard(symbol int, suit rune) Card {
 	var value int
 
 	// Determine the value of the card
-	switch symbol {
+	switch CardValue(symbol) {
 	default:
 		value = symbol + 1
 	case CARD_JACK, CARD_QUEEN, CARD_KING:

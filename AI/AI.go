@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"main/cards"
 )
 
@@ -9,17 +10,21 @@ type AI struct {
 	cards []cards.Card
 }
 
-func newAI() *AI {
-	return &AI{
+func NewAI() AI {
+	return AI{
 		Total: 0,
 		cards: make([]cards.Card, 3),
 	}
 }
 
-func keepHitting(ai *AI) {
+func Play(ai *AI, d *cards.Deck) {
 	for ai.Total < 17 {
-		ai.cards = append(ai.cards, cards.NewCard(cards.CARD_ONE, '\u2663'))
-		ai.Total += ai.cards[len(ai.cards)-1].Value
+		card, err := cards.HitDeck(*d)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ai.cards = append(ai.cards, *card)
+		ai.Total += card.Value
 
 	}
 }
