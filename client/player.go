@@ -6,7 +6,6 @@ import (
 	"main/message"
 	"main/cards"
 	"main/Dealer"
-	"cards.go"
 	"golang.org/x/net/websocket"
 )
 
