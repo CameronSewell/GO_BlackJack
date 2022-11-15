@@ -1,9 +1,11 @@
-package main
+package client
 
 import (
 	"fmt"
 	"log"
 	"main/message"
+	"main/cards"
+	"main/Dealer"
 	"cards.go"
 	"golang.org/x/net/websocket"
 )
@@ -14,12 +16,10 @@ type player interface
 	stand()
 	quit()
 	bet(int)
-}
 
-type superPLayer struct
-{
-	hand Card
-	//money dollars
+	var Total int
+	var hand []cards.cards
+	var money float32
 }
 
 func stand()
@@ -36,7 +36,7 @@ func stand()
 func hit()
 {
 	var data message.T
-	data.Msg = "call hit()"
+	data.Msg = "dealer.drawCard()"
 	if err := websocket.JSON.Send(ws, data); err != nil {
 		log.Fatal(err)
 	}
