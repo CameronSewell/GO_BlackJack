@@ -10,6 +10,7 @@ import (
 
 type CardValue int
 
+// Define constants for creating a deck
 const CardValues int = 14
 const Suits int = 4
 
