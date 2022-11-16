@@ -44,20 +44,24 @@ func newPlayer() Player {
 
 func stand()
 {
+	log.Println("stand func called")
 	return player.hand
 }
 func hit()
 {
+	log.Println("hit func called")
 	var Card card = cards.HitDeck(dealer.deck)
 	player.Total += card.value
 	return player.hand = append(card)
 }
 func quit()
 {
+	log.Println("quit func called")
 	os.Exit(0)
 }
 func bet(int amount)
 {
+	log.Println("bet func called")
 	player.money = player.money - amount
 	//add amount to the pot
 }
@@ -67,9 +71,11 @@ func getTotal()
 }
 func split()
 {
+	return log.Println("spit func called")
 	//
 }
 func double()
 {
-	player.bet(player.buyIn)
+	log.Println("double func called")
+	return player.bet(player.buyIn)
 }
