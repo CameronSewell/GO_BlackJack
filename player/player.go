@@ -1,6 +1,7 @@
 package player
 
 import (
+	dealer "main/Dealer"
 	"main/cards"
 	"main/result"
 )
@@ -21,12 +22,11 @@ const (
 	STAND
 )
 
-const ()
-
 // Defines a player struct
 type Player struct {
 	Hand       cards.Hand
 	playerName string
+	action     PlayerAction
 	money      float32
 	bet        float32
 }
@@ -37,6 +37,7 @@ func NewPlayer(name string) Player {
 	p := Player{
 		Hand:       cards.NewHand(),
 		playerName: name,
+		action:     START,
 		money:      StartingAmount,
 		bet:        0,
 	}
@@ -56,15 +57,16 @@ func PlaceBet(player Player, amount float32) Player {
 }
 
 // Close the player's bet and give them twice the money
-// They bet if they win
+// They bet if they win, their money back if they tie,
+// Or none of it if they lose
 func CloseBet(player Player, res result.Result) Player {
 	switch res {
 	case result.WIN:
 		player.money += 2 * player.bet
-		break
+
 	case result.TIE:
 		player.money += player.bet
-		break
+
 	case result.LOSS:
 		break
 	}
@@ -88,6 +90,29 @@ func HasMoneyLeft(player Player) bool {
 	return GetMoney(player) > 0
 }
 
+// Get the name of the player
 func GetName(player Player) string {
 	return player.playerName
+}
+
+// Make the player hit the deck
+func PlayerHit(player Player, dlr dealer.Dealer) Player {
+	if !cards.IsBust(player.Hand) && !cards.IsBlackjack(player.Hand) {
+		player.Hand = cards.AddCard(dealer.DealCard(dlr), player.Hand)
+		player.action = HIT
+	} else {
+		player.action = STAND
+	}
+	return player
+}
+
+// Make the given player stand (is done taking hits)
+func PlayerStand(player Player) Player {
+	player.action = STAND
+	return player
+}
+
+// Get the current action the player is taking
+func GetPlayerAction(player Player) PlayerAction {
+	return player.action
 }

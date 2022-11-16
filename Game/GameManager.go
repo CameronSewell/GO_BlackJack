@@ -1,38 +1,42 @@
 package Game
 
 import (
+	dealer "main/Dealer"
+	"main/ai"
 	"main/cards"
 	"main/player"
 	"main/result"
-	"math/rand"
 )
 
+// Represents the game state
 type GameState int
 
+// Enum of possible game states
 const (
 	GAME_START GameState = iota
 	PLAYER_TURN
+	AI_TURN
 	DEALER_TURN
 	GAME_END
 )
 
 // Struct containing data for managing the game
 type GameManager struct {
-	dealer  Dealer
-	players []player.Player
-	state   GameState
-	//ai     []AI
+	dlr       dealer.Dealer
+	player    player.Player
+	state     GameState
+	aiPlayers []ai.AI
 }
 
 // Contains the current state of the running game
 var gm GameManager
 
 // Create a new game and initialize all players
-// TODO: add AI data
-func NewGame(names []string) {
+func NewGame(names []string, thresholds []float32) {
 	gm = GameManager{}
-	for i := 0; i < len(names); i++ {
-		gm.players[i] = player.NewPlayer(names[i])
+	gm.player = player.NewPlayer(names[0])
+	for i := 0; i < len(thresholds); i++ {
+		gm.aiPlayers[i] = ai.NewAI(thresholds[i], names[i+1])
 	}
 }
 
@@ -40,27 +44,25 @@ func NewGame(names []string) {
 // TODO: add AI functionality
 func StartGame(bet float32) {
 	//Initialize new dealer
-	gm.dealer = NewDealer()
+	gm.dlr = dealer.NewDealer()
+	gm.player = player.PlaceBet(gm.player, bet)
 
 	//Place new bets for everyone and remake starting hands
-	for i := 0; i < len(gm.players); i++ {
+	for i := 0; i < len(gm.aiPlayers); i++ {
 		//Randomly generate bet if player is AI (position greater than zero)
-		if i > 0 {
-			bet = player.MinBet + rand.Float32()*(player.MaxBet-player.MinBet)
-		}
 
 		//Place bet
-		gm.players[i] = player.PlaceBet(gm.players[i], bet)
+		gm.aiPlayers[i] = ai.PlaceBet(gm.aiPlayers[i])
 
 		//Create a starting hand
-		gm.players[i].Hand = DealStartingHand(gm.dealer, gm.players[i].Hand)
+		gm.aiPlayers[i].Plr.Hand = dealer.DealStartingHand(gm.dlr, gm.aiPlayers[i].Plr.Hand)
 	}
 
 	//Reset the game state to start
 	gm.state = GAME_START
 
 	//Deal starting hands
-	gm.dealer.Hand = DealStartingHand(gm.dealer, gm.dealer.Hand)
+	gm.dlr.Hand = dealer.DealStartingHand(gm.dlr, gm.dlr.Hand)
 }
 
 // Play the game
@@ -71,13 +73,16 @@ func PlayGame() {
 	//Continuously run the game until it ends
 	for gm.state != GAME_END {
 		switch gm.state {
-		//Player turn in game (goes first)
+		//AI turns in game (AIs go first)
+		case AI_TURN:
+			playGameAIs()
+		//Player goes second to last
 		case PLAYER_TURN:
 			PlayGamePlayers(player.START)
-
+			gm.state = DEALER_TURN
 		//Let the dealer play when it's their turn
 		case DEALER_TURN:
-			DealerPlay(gm.dealer)
+			gm.dlr = dealer.DealerPlay(gm.dlr)
 			gm.state = GAME_END
 
 		}
@@ -87,70 +92,82 @@ func PlayGame() {
 	EndGame()
 }
 
-// Prompt and respond to actions from the user
+// TODO: Figure out how to connect this to the frontend
 func PlayGamePlayers(action player.PlayerAction) {
-	for i := 0; i < len(gm.players); i++ {
-		for action != player.STAND {
-			//TODO: figure out AI logic VS player logic
-			//For hitting and standing
-			action = player.STAND
+	//TODO: put this in the frontend somehow
+}
+
+// Make each of the AIs play the game until they're done
+func playGameAIs() {
+	for i := 0; i < len(gm.aiPlayers); i++ {
+		gm.aiPlayers[i] = ai.AIPlay(gm.aiPlayers[i], gm.dlr)
+	}
+	gm.state = PLAYER_TURN
+}
+
+// Get the result of the given hand by comparing it
+// Against the dealer's
+func getResult(h cards.Hand) result.Result {
+	//If the player busted, it means they lost
+	var r result.Result
+	if cards.IsBust(h) {
+		r = result.LOSS
+
+		//Else, check against all other conditions
+	} else {
+
+		//If the dealer busted and the player didn't, the player wins the hand
+		if cards.IsBust(gm.dlr.Hand) {
+			r = result.WIN
+
+			//Else compare the dealer's final total against the player's
+		} else {
+			//Get the totals
+			dealerTotal := cards.GetHandTotal(gm.dlr.Hand)
+			playerTotal := cards.GetHandTotal(h)
+
+			//The player won if their result was greater than the dealer's total
+			if playerTotal > dealerTotal {
+				r = result.WIN
+
+				//The player tied if their total is equal to the dealer's
+			} else if playerTotal == dealerTotal {
+				r = result.TIE
+
+				//Else, they lost the match
+			} else {
+				r = result.LOSS
+			}
 		}
 	}
+	return r
 }
 
 // End the running Blackjack game for all players
 func EndGame() {
 	//Loop over all players in the game
-	for i := 0; i < len(gm.players); i++ {
-		//Get the current player
-		p := GetPlayer(i)
-		var r result.Result
-
-		//Check if the player won, lost, or tied with the dealer
-
-		//If the player busted, it means they lost
-		if cards.IsBust(p.Hand) {
-			r = result.LOSS
-
-			//Else, check against all other conditions
-		} else {
-
-			//If the dealer busted and the player didn't, the player wins the hand
-			if cards.IsBust(gm.dealer.Hand) {
-				r = result.WIN
-
-				//Else compare the dealer's final total against the player's
-			} else {
-				//Get the totals
-				dealerTotal := cards.GetHandTotal(gm.dealer.Hand)
-				playerTotal := cards.GetHandTotal(p.Hand)
-
-				//The player won if their result was greater than the dealer's total
-				if playerTotal > dealerTotal {
-					r = result.WIN
-
-					//The player tied if their total is equal to the dealer's
-				} else if playerTotal == dealerTotal {
-					r = result.TIE
-
-					//Else, they lost the match
-				} else {
-					r = result.LOSS
-				}
-			}
-		}
+	var r result.Result
+	for i := 0; i < len(gm.aiPlayers); i++ {
+		r = getResult(gm.aiPlayers[i].Plr.Hand)
 
 		//Update the bets of the
-		gm.players[i] = player.CloseBet(gm.players[i], r)
+		gm.aiPlayers[i].Plr = player.CloseBet(gm.aiPlayers[i].Plr, r)
 	}
+	r = getResult(gm.player.Hand)
+	gm.player = player.CloseBet(gm.player, r)
 }
 
 // Get the number of players playing the game
-func GetPlayerCount() int {
-	return len(gm.players)
+func GetAICount() int {
+	return len(gm.aiPlayers) + 1
 }
 
 // Get the player at the specified index
-func GetPlayer(i int) player.Player {
-	return gm.players[i]
+func GetPlayer() player.Player {
+	return gm.player
+}
+
+// Get the AI at the specific index
+func GetAI(i int) ai.AI {
+	return gm.aiPlayers[i]
 }

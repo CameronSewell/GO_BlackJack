@@ -1,4 +1,4 @@
-package Game
+package dealer
 
 import (
 	"log"
@@ -32,7 +32,7 @@ func DealStartingHand(dealer Dealer, hand cards.Hand) cards.Hand {
 	return hand
 }
 
-// Dealer deals a card from the remaining deck
+// Dealers a card from the dealer's remaining deck
 func DealCard(dealer Dealer) cards.Card {
 	card, err := cards.HitDeck(dealer.deck)
 	if err != nil {
@@ -44,8 +44,9 @@ func DealCard(dealer Dealer) cards.Card {
 // Makes the dealer hit the deck until their total
 // reaches or breaks 17. When that happens, the dealer stops
 // Taking hits
-func DealerPlay(dealer Dealer) {
+func DealerPlay(dealer Dealer) Dealer {
 	for cards.GetHandTotal(dealer.Hand) < 17 {
 		dealer.Hand = cards.AddCard(DealCard(dealer), dealer.Hand)
 	}
+	return dealer
 }
