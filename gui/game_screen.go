@@ -13,11 +13,11 @@ import (
 func GameScreen() *fyne.Container {
 
 	//Set of buttons and container for them
-	hitButton := widget.NewButton("Hit", func() { log.Println("hit button tapped") })
-	splitButton := widget.NewButton("Split", func() { log.Println("split button tapped") })
-	doubleButton := widget.NewButton("Double", func() { log.Println("double button tapped") })
-	surrenderButton := widget.NewButton("Surrender", func() { log.Println("surrender button tapped") })
-	standButton := widget.NewButton("Stand", func() { log.Println("stand button tapped") })
+	hitButton := widget.NewButton("Hit", func() { player.hit() })
+	splitButton := widget.NewButton("Split", func() { player.split() })
+	doubleButton := widget.NewButton("Double", func() { player.double() })
+	surrenderButton := widget.NewButton("Surrender", func(){ player.quit() })
+	standButton := widget.NewButton("Stand", func() { player.stand() })
 	gameButtons := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), layout.NewSpacer(), hitButton, surrenderButton, doubleButton, splitButton,
 		standButton, layout.NewSpacer(), layout.NewSpacer())
 

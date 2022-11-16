@@ -7,10 +7,12 @@ import (
 	"main/cards"
 	"main/Dealer"
 	"golang.org/x/net/websocket"
+	"os"
 )
 
-type player interface
+type Player interface
 {
+	newPlayer()
 	hit()
 	stand()
 	quit()
@@ -19,42 +21,55 @@ type player interface
 	var Total int
 	var hand []cards.cards
 	var money float32
+	var buyIn float32
+}
+
+func newPlayer() Player {
+
+	player := Player
+	{
+		Total: 0,
+		hand:  make([]cards.Card, 3),
+		money: 10.0,
+		buyIn 1.5,
+	}
+
+	for i := 0; i < 2; i++
+	{
+		player.hand = append(Dealer.DealCard())
+	}
+
+	return p
 }
 
 func stand()
 {
-	var data message.T
-	data.Msg = "call stand()"
-	if err := websocket.JSON.Send(ws, data); err != nil {
-		log.Fatal(err)
-	}
-	if err = websocket.JSON.Receive(ws, &data); err != nil {
-		log.Fatal(err)
-	}
+	return player.hand
 }
 func hit()
 {
-	var data message.T
-	data.Msg = "dealer.drawCard()"
-	if err := websocket.JSON.Send(ws, data); err != nil {
-		log.Fatal(err)
-	}
-	if err = websocket.JSON.Receive(ws, &data); err != nil {
-		log.Fatal(err)
-	}
+	var Card card = cards.HitDeck(dealer.deck)
+	player.Total += card.value
+	return player.hand = append(card)
 }
 func quit()
 {
-
+	os.Exit(0)
 }
 func bet(int amount)
 {
-	var data message.T
-	data.Msg = "call bet(amount)"
-	if err := websocket.JSON.Send(ws, data); err != nil {
-		log.Fatal(err)
-	}
-	if err = websocket.JSON.Receive(ws, &data); err != nil {
-		log.Fatal(err)
-	}
+	player.money = player.money - amount
+	//add amount to the pot
+}
+func getTotal()
+{
+	return player.total
+}
+func split()
+{
+	//
+}
+func double()
+{
+	player.bet(player.buyIn)
 }
