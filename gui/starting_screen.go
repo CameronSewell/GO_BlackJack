@@ -26,6 +26,7 @@ func StartScreen() {
 
 		radio := widget.NewRadioGroup([]string{"Mild", "Moderate", "Aggressive"}, func(value string) {
 			log.Println("Radio set to", value)
+			myWindow.SetContent(GameScreen())
 		})
 
 		myWindow.SetContent(container.NewVBox(difficultySelector, radio))
