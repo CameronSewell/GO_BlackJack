@@ -8,20 +8,8 @@ import (
 // Defines a dealer with a total, their
 // hand, and the deck to use for the game
 type Dealer struct {
-	Total int
-	hand  []cards.Card
-	deck  cards.Deck
-}
-
-// Tells the dealer to draw a card from the deck
-// and put it in their own hand
-func drawCard(dealer Dealer) {
-	card, err := cards.HitDeck(dealer.deck)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dealer.hand = append(dealer.hand, *card)
-	dealer.Total += card.Value
+	Hand cards.Hand
+	deck cards.Deck
 }
 
 // Creates a new dealer struct and gives them
@@ -29,44 +17,36 @@ func drawCard(dealer Dealer) {
 func NewDealer() Dealer {
 
 	dealer := Dealer{
-		Total: 0,
-		hand:  make([]cards.Card, 3),
-		deck:  cards.NewDeck(),
-	}
-
-	for i := 0; i < 2; i++ {
-		drawCard(dealer)
+		Hand: cards.NewHand(),
+		deck: cards.NewDeck(),
 	}
 
 	return dealer
 }
 
-// Deal a card from the deck
-func DealCard(dealer Dealer) (*cards.Card, error) {
-	return cards.HitDeck(dealer.deck)
+// Deal two cards to the given hand to start the game
+func DealStartingHand(dealer Dealer, hand cards.Hand) cards.Hand {
+	for i := 0; i < 2; i++ {
+		hand = cards.AddCard(DealCard(dealer), hand)
+	}
+	return hand
 }
 
-// Get the number of cards in the current hand
-func GetDealerHandCount(dealer Dealer) int {
-	return len(dealer.hand)
-}
-
-// Get the first card in the dealer's hand (meant to
-// be the only visible hand)
-func GetDealerVisibleCard(dealer Dealer) cards.Card {
-	return dealer.hand[0]
-}
-
-// Get the total value of the dealer's hand
-func GetDealerHandTotal(dealer Dealer) int {
-	return dealer.Total
+// Dealers a card from the dealer's remaining deck
+func DealCard(dealer Dealer) cards.Card {
+	card, err := cards.HitDeck(dealer.deck)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return *card
 }
 
 // Makes the dealer hit the deck until their total
 // reaches or breaks 17. When that happens, the dealer stops
 // Taking hits
-func DealerPlay(dealer Dealer) {
-	for dealer.Total < 17 {
-		drawCard(dealer)
+func DealerPlay(dealer Dealer) Dealer {
+	for cards.GetHandTotal(dealer.Hand) < 17 {
+		dealer.Hand = cards.AddCard(DealCard(dealer), dealer.Hand)
 	}
+	return dealer
 }

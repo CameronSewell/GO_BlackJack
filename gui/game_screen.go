@@ -2,22 +2,32 @@ package gui
 
 import (
 	"fmt"
+	"log"
+	"main/Game"
+	"main/cards"
+	"main/player"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"log"
 )
 
 func GameScreen() *fyne.Container {
 
 	//Set of buttons and container for them
-	hitButton := widget.NewButton("Hit", func() { log.Println("hit button tapped") })
+	hitButton := widget.NewButton("Hit", func() {
+		if !cards.IsBust(Game.GetPlayer().Hand) {
+			Game.PlayerMove(player.HIT)
+		} else {
+			fmt.Println("Your Hand is busted. Cannot hit again.")
+		}
+	})
 	splitButton := widget.NewButton("Split", func() { log.Println("split button tapped") })
 	doubleButton := widget.NewButton("Double", func() { log.Println("double button tapped") })
 	surrenderButton := widget.NewButton("Surrender", func() { log.Println("surrender button tapped") })
-	standButton := widget.NewButton("Stand", func() { log.Println("stand button tapped") })
+	standButton := widget.NewButton("Stand", func() { Game.PlayerMove(player.STAND) })
 	gameButtons := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), layout.NewSpacer(), hitButton, surrenderButton, doubleButton, splitButton,
 		standButton, layout.NewSpacer(), layout.NewSpacer())
 
