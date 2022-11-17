@@ -41,11 +41,11 @@ func NewGame(names []string, thresholds []float32) {
 }
 
 // Create a new game and initialize everyone
-// TODO: add AI functionality
 func StartGame(bet float32) {
 	//Initialize new dealer
 	gm.dlr = dealer.NewDealer()
 	gm.player = player.PlaceBet(gm.player, bet)
+	gm.player.Hand = dealer.DealStartingHand(gm.dlr, gm.player.Hand)
 
 	//Place new bets for everyone and remake starting hands
 	for i := 0; i < len(gm.aiPlayers); i++ {
@@ -58,11 +58,11 @@ func StartGame(bet float32) {
 		gm.aiPlayers[i].Plr.Hand = dealer.DealStartingHand(gm.dlr, gm.aiPlayers[i].Plr.Hand)
 	}
 
-	//Reset the game state to start
-	gm.state = GAME_START
-
 	//Deal starting hands
 	gm.dlr.Hand = dealer.DealStartingHand(gm.dlr, gm.dlr.Hand)
+
+	//Reset the game state to start
+	gm.state = GAME_START
 }
 
 // Play the game
@@ -76,6 +76,7 @@ func PlayGame() {
 		//AI turns in game (AIs go first)
 		case AI_TURN:
 			playGameAIs()
+			gm.state = PLAYER_TURN
 		//Player goes second to last
 		case PLAYER_TURN:
 			PlayGamePlayers(player.START)
@@ -102,7 +103,6 @@ func playGameAIs() {
 	for i := 0; i < len(gm.aiPlayers); i++ {
 		gm.aiPlayers[i] = ai.AIPlay(gm.aiPlayers[i], gm.dlr)
 	}
-	gm.state = PLAYER_TURN
 }
 
 // Get the result of the given hand by comparing it
