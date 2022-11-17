@@ -96,14 +96,14 @@ func GetName(player Player) string {
 }
 
 // Make the player hit the deck
-func PlayerHit(player Player, dlr dealer.Dealer) Player {
+func PlayerHit(player Player, dlr dealer.Dealer) (Player, dealer.Dealer) {
 	if !cards.IsBust(player.Hand) && !cards.IsBlackjack(player.Hand) {
 		player.Hand = cards.AddCard(dealer.DealCard(dlr), player.Hand)
 		player.action = HIT
 	} else {
 		player.action = STAND
 	}
-	return player
+	return player, dlr
 }
 
 // Make the given player stand (is done taking hits)

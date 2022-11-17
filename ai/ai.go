@@ -13,6 +13,12 @@ type AI struct {
 	threshold float32
 }
 
+const (
+	MILD       = 0.25
+	MODERATE   = 0.5
+	AGGRESSIVE = 0.75
+)
+
 // Return a new AI struct with its
 func NewAI(threshold float32, name string) AI {
 	aiPlayer := AI{

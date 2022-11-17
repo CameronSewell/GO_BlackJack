@@ -38,70 +38,67 @@ func NewGame(names []string, thresholds []float32) {
 	for i := 0; i < len(thresholds); i++ {
 		gm.aiPlayers[i] = ai.NewAI(thresholds[i], names[i+1])
 	}
+	gm.state = GAME_START
 }
 
 // Create a new game and initialize everyone
 func StartGame(bet float32) {
 	//Initialize new dealer
-	gm.dlr = dealer.NewDealer()
-	gm.player = player.PlaceBet(gm.player, bet)
-	gm.player.Hand = dealer.DealStartingHand(gm.dlr, gm.player.Hand)
+	if gm.state == GAME_START {
+		gm.dlr = dealer.NewDealer()
+		gm.player = player.PlaceBet(gm.player, bet)
+		gm.player.Hand = dealer.DealStartingHand(gm.dlr, gm.player.Hand)
 
-	//Place new bets for everyone and remake starting hands
-	for i := 0; i < len(gm.aiPlayers); i++ {
-		//Randomly generate bet if player is AI (position greater than zero)
+		//Place new bets for everyone and remake starting hands
+		for i := 0; i < len(gm.aiPlayers); i++ {
+			//Randomly generate bet if player is AI (position greater than zero)
 
-		//Place bet
-		gm.aiPlayers[i] = ai.PlaceBet(gm.aiPlayers[i])
+			//Place bet
+			gm.aiPlayers[i] = ai.PlaceBet(gm.aiPlayers[i])
 
-		//Create a starting hand
-		gm.aiPlayers[i].Plr.Hand = dealer.DealStartingHand(gm.dlr, gm.aiPlayers[i].Plr.Hand)
-	}
-
-	//Deal starting hands
-	gm.dlr.Hand = dealer.DealStartingHand(gm.dlr, gm.dlr.Hand)
-
-	//Reset the game state to start
-	gm.state = GAME_START
-}
-
-// Play the game
-func PlayGame() {
-
-	gm.state = PLAYER_TURN
-
-	//Continuously run the game until it ends
-	for gm.state != GAME_END {
-		switch gm.state {
-		//AI turns in game (AIs go first)
-		case AI_TURN:
-			playGameAIs()
-			gm.state = PLAYER_TURN
-		//Player goes second to last
-		case PLAYER_TURN:
-			PlayGamePlayers(player.START)
-			gm.state = DEALER_TURN
-		//Let the dealer play when it's their turn
-		case DEALER_TURN:
-			gm.dlr = dealer.DealerPlay(gm.dlr)
-			gm.state = GAME_END
-
+			//Create a starting hand
+			gm.aiPlayers[i].Plr.Hand = dealer.DealStartingHand(gm.dlr, gm.aiPlayers[i].Plr.Hand)
 		}
-	}
 
-	//Finish running the current blackjack game
-	EndGame()
+		//Deal starting hands
+		gm.dlr.Hand = dealer.DealStartingHand(gm.dlr, gm.dlr.Hand)
+
+		//Reset the game state to start
+		gm.state = AI_TURN
+		AIMoves()
+	}
 }
 
 // TODO: Figure out how to connect this to the frontend
-func PlayGamePlayers(action player.PlayerAction) {
-	//TODO: put this in the frontend somehow
+func PlayerMove(action player.PlayerAction) {
+	if gm.state == PLAYER_TURN {
+		switch action {
+		case player.HIT:
+			gm.player, gm.dlr = player.PlayerHit(gm.player, gm.dlr)
+		case player.STAND:
+			gm.player = player.PlayerStand(gm.player)
+			gm.state = DEALER_TURN
+			DealerMoves()
+		}
+	}
 }
 
 // Make each of the AIs play the game until they're done
-func playGameAIs() {
-	for i := 0; i < len(gm.aiPlayers); i++ {
-		gm.aiPlayers[i] = ai.AIPlay(gm.aiPlayers[i], gm.dlr)
+func AIMoves() {
+	if gm.state == AI_TURN {
+		for i := 0; i < len(gm.aiPlayers); i++ {
+			gm.aiPlayers[i] = ai.AIPlay(gm.aiPlayers[i], gm.dlr)
+		}
+		gm.state = PLAYER_TURN
+	}
+}
+
+// The dealer makes their move
+func DealerMoves() {
+	if gm.state == DEALER_TURN {
+		gm.dlr = dealer.DealerPlay(gm.dlr)
+		gm.state = GAME_END
+		EndGame()
 	}
 }
 
@@ -145,16 +142,17 @@ func getResult(h cards.Hand) result.Result {
 
 // End the running Blackjack game for all players
 func EndGame() {
-	//Loop over all players in the game
-	var r result.Result
-	for i := 0; i < len(gm.aiPlayers); i++ {
-		r = getResult(gm.aiPlayers[i].Plr.Hand)
+	if gm.state == GAME_END {
+		var r result.Result
+		for i := 0; i < len(gm.aiPlayers); i++ {
+			r = getResult(gm.aiPlayers[i].Plr.Hand)
 
-		//Update the bets of the
-		gm.aiPlayers[i].Plr = player.CloseBet(gm.aiPlayers[i].Plr, r)
+			//Update the bets of the
+			gm.aiPlayers[i].Plr = player.CloseBet(gm.aiPlayers[i].Plr, r)
+		}
+		r = getResult(gm.player.Hand)
+		gm.player = player.CloseBet(gm.player, r)
 	}
-	r = getResult(gm.player.Hand)
-	gm.player = player.CloseBet(gm.player, r)
 }
 
 // Get the number of players playing the game
