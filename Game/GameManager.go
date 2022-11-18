@@ -46,22 +46,22 @@ func StartGame(bet float32) {
 	//Initialize new dealer
 	if gm.state == GAME_START {
 		gm.dlr = dealer.NewDealer()
-		gm.player = player.PlaceBet(gm.player, bet)
-		gm.player.Hand = dealer.DealStartingHand(gm.dlr, gm.player.Hand)
+		gm.player.PlaceBet(bet)
+		gm.dlr.DealStartingHand(&gm.player.Hand)
 
 		//Place new bets for everyone and remake starting hands
 		for i := 0; i < len(gm.aiPlayers); i++ {
 			//Randomly generate bet if player is AI (position greater than zero)
 
 			//Place bet
-			gm.aiPlayers[i] = ai.PlaceBet(gm.aiPlayers[i])
+			gm.aiPlayers[i].PlaceBet()
 
 			//Create a starting hand
-			gm.aiPlayers[i].Plr.Hand = dealer.DealStartingHand(gm.dlr, gm.aiPlayers[i].Plr.Hand)
+			gm.dlr.DealStartingHand(&gm.aiPlayers[i].Plr.Hand)
 		}
 
 		//Deal starting hands
-		gm.dlr.Hand = dealer.DealStartingHand(gm.dlr, gm.dlr.Hand)
+		gm.dlr.DealStartingHand(&gm.dlr.Hand)
 
 		//Reset the game state to start
 		gm.state = AI_TURN
@@ -74,9 +74,9 @@ func PlayerMove(action player.PlayerAction) {
 	if gm.state == PLAYER_TURN {
 		switch action {
 		case player.HIT:
-			gm.player, gm.dlr = player.PlayerHit(gm.player, gm.dlr)
+			gm.player.PlayerHit(&gm.dlr)
 		case player.STAND:
-			gm.player = player.PlayerStand(gm.player)
+			gm.player.PlayerStand()
 			gm.state = DEALER_TURN
 			DealerMoves()
 		}
@@ -87,7 +87,7 @@ func PlayerMove(action player.PlayerAction) {
 func AIMoves() {
 	if gm.state == AI_TURN {
 		for i := 0; i < len(gm.aiPlayers); i++ {
-			gm.aiPlayers[i] = ai.AIPlay(gm.aiPlayers[i], gm.dlr)
+			gm.aiPlayers[i].AIPlay(&gm.dlr)
 		}
 		gm.state = PLAYER_TURN
 	}
@@ -96,7 +96,7 @@ func AIMoves() {
 // The dealer makes their move
 func DealerMoves() {
 	if gm.state == DEALER_TURN {
-		gm.dlr = dealer.DealerPlay(gm.dlr)
+		gm.dlr.DealerPlay()
 		gm.state = GAME_END
 		EndGame()
 	}
@@ -107,21 +107,21 @@ func DealerMoves() {
 func getResult(h cards.Hand) result.Result {
 	//If the player busted, it means they lost
 	var r result.Result
-	if cards.IsBust(h) {
+	if h.IsBust() {
 		r = result.LOSS
 
 		//Else, check against all other conditions
 	} else {
 
 		//If the dealer busted and the player didn't, the player wins the hand
-		if cards.IsBust(gm.dlr.Hand) {
+		if gm.dlr.Hand.IsBust() {
 			r = result.WIN
 
 			//Else compare the dealer's final total against the player's
 		} else {
 			//Get the totals
-			dealerTotal := cards.GetHandTotal(gm.dlr.Hand)
-			playerTotal := cards.GetHandTotal(h)
+			dealerTotal := gm.dlr.Hand.GetHandTotal()
+			playerTotal := h.GetHandTotal()
 
 			//The player won if their result was greater than the dealer's total
 			if playerTotal > dealerTotal {
@@ -148,10 +148,10 @@ func EndGame() {
 			r = getResult(gm.aiPlayers[i].Plr.Hand)
 
 			//Update the bets of the
-			gm.aiPlayers[i].Plr = player.CloseBet(gm.aiPlayers[i].Plr, r)
+			gm.aiPlayers[i].Plr.CloseBet(r)
 		}
 		r = getResult(gm.player.Hand)
-		gm.player = player.CloseBet(gm.player, r)
+		gm.player.CloseBet(r)
 	}
 }
 
@@ -161,8 +161,8 @@ func GetAICount() int {
 }
 
 // Get the player at the specified index
-func GetPlayer() player.Player {
-	return gm.player
+func GetPlayer() *player.Player {
+	return &gm.player
 }
 
 // Get the AI at the specific index

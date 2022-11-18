@@ -16,7 +16,7 @@ type Deck struct {
 }
 
 // Number of cards left
-func CardsLeft(d Deck) int {
+func (d *Deck) CardsLeft() int {
 	return d.index + 1
 }
 
@@ -36,7 +36,7 @@ func NewDeck() Deck {
 }
 
 // Randomly shuffle the deck
-func ShuffleDeck(d Deck) Deck {
+func (d *Deck) ShuffleDeck() {
 	//Initialize randomizer
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
@@ -48,13 +48,12 @@ func ShuffleDeck(d Deck) Deck {
 		//index
 		d.cards[i], d.cards[n] = d.cards[n], d.cards[i]
 	}
-	return d
 }
 
 // Hit the deck and decrease the number of remaining cards
-func HitDeck(d Deck) (*Card, error) {
+func (d *Deck) HitDeck() (*Card, error) {
 	//Throw error if no cards left
-	if CardsLeft(d) == 0 {
+	if d.CardsLeft() == 0 {
 		return nil, errors.New("hit last card in deck")
 	}
 	c := &d.cards[d.index]

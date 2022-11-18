@@ -25,16 +25,15 @@ func NewDealer() Dealer {
 }
 
 // Deal two cards to the given hand to start the game
-func DealStartingHand(dealer Dealer, hand cards.Hand) cards.Hand {
+func (d *Dealer) DealStartingHand(hand *cards.Hand) {
 	for i := 0; i < 2; i++ {
-		hand = cards.AddCard(DealCard(dealer), hand)
+		hand.AddCard(d.DealCard())
 	}
-	return hand
 }
 
 // Dealers a card from the dealer's remaining deck
-func DealCard(dealer Dealer) cards.Card {
-	card, err := cards.HitDeck(dealer.deck)
+func (d *Dealer) DealCard() cards.Card {
+	card, err := d.deck.HitDeck()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,9 +43,8 @@ func DealCard(dealer Dealer) cards.Card {
 // Makes the dealer hit the deck until their total
 // reaches or breaks 17. When that happens, the dealer stops
 // Taking hits
-func DealerPlay(dealer Dealer) Dealer {
-	for cards.GetHandTotal(dealer.Hand) < 17 {
-		dealer.Hand = cards.AddCard(DealCard(dealer), dealer.Hand)
+func (d *Dealer) DealerPlay() {
+	for d.Hand.GetHandTotal() < 17 {
+		d.Hand.AddCard(d.DealCard())
 	}
-	return dealer
 }
