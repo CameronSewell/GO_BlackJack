@@ -45,74 +45,70 @@ func NewPlayer(name string) Player {
 }
 
 // Place the given bet
-func PlaceBet(player Player, amount float32) Player {
+func (p *Player) PlaceBet(amount float32) {
 	if amount > MaxBet {
 		amount = MaxBet
 	} else if amount < MinBet {
 		amount = MinBet
 	}
-	player.bet = amount
-	player.money -= amount
-	return player
+	p.bet = amount
+	p.money -= amount
 }
 
 // Close the player's bet and give them twice the money
 // They bet if they win, their money back if they tie,
 // Or none of it if they lose
-func CloseBet(player Player, res result.Result) Player {
+func (p *Player) CloseBet(res result.Result) {
 	switch res {
 	case result.WIN:
-		player.money += 2 * player.bet
+		p.money += 2 * p.bet
 
 	case result.TIE:
-		player.money += player.bet
+		p.money += p.bet
 
 	case result.LOSS:
 		break
 	}
 
-	player.bet = 0
-	return player
+	p.bet = 0
 }
 
 // Get the current bet of the player
-func GetBet(player Player) float32 {
-	return player.bet
+func (p *Player) GetBet() float32 {
+	return p.bet
 }
 
 // Get the money the player has remaining
-func GetMoney(player Player) float32 {
-	return player.money
+func (p *Player) GetMoney() float32 {
+	return p.money
 }
 
 // Test if the player has any money left in the game
-func HasMoneyLeft(player Player) bool {
-	return GetMoney(player) > 0
+func (p *Player) HasMoneyLeft() bool {
+	return p.GetMoney() > 0
 }
 
 // Get the name of the player
-func GetName(player Player) string {
-	return player.playerName
+func (p *Player) GetName() string {
+	return p.playerName
 }
 
 // Make the player hit the deck
-func PlayerHit(player Player, dlr dealer.Dealer) (Player, dealer.Dealer) {
-	if !cards.IsBust(player.Hand) && !cards.IsBlackjack(player.Hand) {
-		player.Hand = cards.AddCard(dealer.DealCard(dlr), player.Hand)
-		player.action = HIT
+func (p *Player) PlayerHit(dlr *dealer.Dealer) {
+	if !p.Hand.IsBust() && !p.Hand.IsBlackjack() {
+		p.Hand.AddCard(dlr.DealCard())
+		p.action = HIT
 	} else {
-		player.action = STAND
+		p.action = STAND
 	}
-	return player, dlr
 }
 
 // Make the given player stand (is done taking hits)
-func PlayerStand(player Player) Player {
-	player.action = STAND
-	return player
+func (p *Player) PlayerStand() {
+	p.action = STAND
 }
 
 // Get the current action the player is taking
-func GetPlayerAction(player Player) PlayerAction {
-	return player.action
+func (p *Player) GetPlayerAction() PlayerAction {
+	return p.action
 }

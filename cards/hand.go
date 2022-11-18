@@ -17,38 +17,37 @@ func NewHand() Hand {
 }
 
 // Get the count of the hand
-func GetHandCount(h Hand) int {
+func (h *Hand) GetHandCount() int {
 	return len(h.cards)
 }
 
 // Get the hand total
-func GetHandTotal(h Hand) int {
+func (h *Hand) GetHandTotal() int {
 	return h.total
 }
 
 // Return true if the given hand is a blackjack
-func IsBlackjack(h Hand) bool {
+func (h *Hand) IsBlackjack() bool {
 	return h.total == Blackjack
 }
 
 // Return true if the given hand's total is over 21
-func IsBust(h Hand) bool {
+func (h *Hand) IsBust() bool {
 	return h.total > Blackjack
 }
 
 // Get first card of the hand
-func GetFirstCard(h Hand) Card {
+func (h *Hand) GetFirstCard() Card {
 	return h.cards[0]
 }
 
 // Add a card to the given hand
-func AddCard(card Card, h Hand) Hand {
+func (h *Hand) AddCard(card Card) {
 	h.cards = append(h.cards, card)
 	h.total += card.Value
-	return h
 }
 
 // Get all the cards of the hand (ONLY CALL AT END OF GAME)
-func GetCards(h Hand) []Card {
+func (h *Hand) GetCards() []Card {
 	return h.cards
 }

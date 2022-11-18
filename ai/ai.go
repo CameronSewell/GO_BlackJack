@@ -29,26 +29,24 @@ func NewAI(threshold float32, name string) AI {
 }
 
 // Place a bet for the AI
-func PlaceBet(aiPlayer AI) AI {
+func (aiPlayer *AI) PlaceBet() {
 	bet := player.MinBet + rand.Float32()*(player.MaxBet-player.MinBet)
-	aiPlayer.Plr = player.PlaceBet(aiPlayer.Plr, bet)
-	return aiPlayer
+	aiPlayer.Plr.PlaceBet(bet)
 }
 
 // AI player keeps hitting until they choose not to or
 // They cannot
-func AIPlay(aiPlayer AI, dlr dealer.Dealer) AI {
+func (aiPlayer *AI) AIPlay(dlr *dealer.Dealer) {
 	var hit bool
 	for hit {
 		//Hit if the randomly generated float between 0 and 1
 		//Is greater than the threshold
 		if rand.Float32() > aiPlayer.threshold {
-			player.PlayerHit(aiPlayer.Plr, dlr)
+			aiPlayer.Plr.PlayerHit(dlr)
 			//Else stand and stop taking hits
 		} else {
 			hit = false
-			player.PlayerStand(aiPlayer.Plr)
+			aiPlayer.Plr.PlayerHit(dlr)
 		}
 	}
-	return aiPlayer
 }

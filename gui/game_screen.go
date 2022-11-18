@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"main/Game"
-	"main/cards"
 	"main/player"
 
 	"fyne.io/fyne/v2"
@@ -18,7 +17,7 @@ func GameScreen() *fyne.Container {
 
 	//Set of buttons and container for them
 	hitButton := widget.NewButton("Hit", func() {
-		if !cards.IsBust(Game.GetPlayer().Hand) {
+		if !Game.GetPlayer().Hand.IsBust() {
 			Game.PlayerMove(player.HIT)
 		} else {
 			fmt.Println("Your Hand is busted. Cannot hit again.")
