@@ -31,6 +31,10 @@ type GameManager struct {
 // Contains the current state of the running game
 var gm GameManager
 
+func GetState() GameState {
+	return gm.state
+}
+
 // Create a new game and initialize all players
 func NewGame(names []string, thresholds []float32) {
 	gm = GameManager{}

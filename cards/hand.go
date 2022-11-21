@@ -3,15 +3,17 @@ package cards
 var Blackjack int = 21
 
 type Hand struct {
-	total int
-	cards []Card
+	total    int
+	cards    []Card
+	isFaceUp []bool
 }
 
 // Create an empty hand
 func NewHand() Hand {
 	h := Hand{
-		total: 0,
-		cards: make([]Card, 1),
+		total:    0,
+		cards:    make([]Card, 0),
+		isFaceUp: make([]bool, 0),
 	}
 	return h
 }
@@ -42,12 +44,23 @@ func (h *Hand) GetFirstCard() Card {
 }
 
 // Add a card to the given hand
-func (h *Hand) AddCard(card Card) {
+func (h *Hand) AddCard(card Card, isUp bool) {
 	h.cards = append(h.cards, card)
 	h.total += card.Value
+	h.isFaceUp = append(h.isFaceUp, isUp)
 }
 
 // Get all the cards of the hand (ONLY CALL AT END OF GAME)
 func (h *Hand) GetCards() []Card {
 	return h.cards
+}
+
+func (h *Hand) SetUp() {
+	for i := 0; i < len(h.isFaceUp); i++ {
+		h.isFaceUp[i] = true
+	}
+}
+
+func (h *Hand) GetFaceUp() []bool {
+	return h.isFaceUp
 }

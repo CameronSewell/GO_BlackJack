@@ -33,10 +33,10 @@ const (
 
 /* These are unicode values that represent the suits of a typical card deck */
 const (
-	SUIT_SPADES   = '\u2660'
-	SUIT_HEARTS   = '\u2665'
-	SUIT_DIAMONDS = '\u2666'
-	SUIT_CLUBS    = '\u2663'
+	SUIT_SPADES   = "Spades"
+	SUIT_HEARTS   = "Hearts"
+	SUIT_DIAMONDS = "Diamonds"
+	SUIT_CLUBS    = "Clubs"
 )
 
 // Represents a single card in a hand.
@@ -45,14 +45,14 @@ type Card struct {
 	Symbol int
 
 	// The suit of the card.
-	Suit rune
+	Suit string
 
 	// The value of the card.
 	Value int
 }
 
-func getSuit(Suit int) rune {
-	var suit rune
+func getSuit(Suit int) string {
+	var suit string
 	switch Suit {
 	default:
 	case 0:
@@ -92,7 +92,7 @@ func (card Card) String() string {
 }
 
 // Creates a new card with the given symbol and suit.
-func NewCard(symbol int, suit rune) Card {
+func NewCard(symbol int, suit string) Card {
 	card := Card{}
 	card.Symbol = symbol
 	card.Suit = suit
