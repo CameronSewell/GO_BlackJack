@@ -15,7 +15,6 @@ type Dealer struct {
 // Creates a new dealer struct and gives them
 // The two starting cards of their hand
 func NewDealer() Dealer {
-
 	dealer := Dealer{
 		Hand: cards.NewHand(),
 		deck: cards.NewDeck(),
@@ -27,7 +26,7 @@ func NewDealer() Dealer {
 // Deal two cards to the given hand to start the game
 func (d *Dealer) DealStartingHand(hand *cards.Hand) {
 	for i := 0; i < 2; i++ {
-		hand.AddCard(d.DealCard())
+		hand.AddCard(d.DealCard(), false)
 	}
 }
 
@@ -45,6 +44,6 @@ func (d *Dealer) DealCard() cards.Card {
 // Taking hits
 func (d *Dealer) DealerPlay() {
 	for d.Hand.GetHandTotal() < 17 {
-		d.Hand.AddCard(d.DealCard())
+		d.Hand.AddCard(d.DealCard(), false)
 	}
 }

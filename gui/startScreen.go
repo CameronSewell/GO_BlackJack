@@ -22,7 +22,6 @@ func StartScreen() {
 	//welcome := canvas.NewText("Welcome to Blackjack!", color.White)
 	centeredImage := container.NewCenter(image)
 	startButton := widget.NewButton("Start Game", func() {
-		//difficultyWindow := myApp.NewWindow("Difficulty Selection")
 		log.Println("start button tapped")
 
 		difficultySelector := widget.NewLabel("Select the aggressiveness of the AI Dealer: ")
@@ -51,6 +50,7 @@ func StartScreen() {
 
 	quit_button := widget.NewButton("Quit", func() {
 		log.Println("tapped")
+		myWindow.SetContent(EndScreen())
 	})
 
 	game_buttons := container.New(layout.NewHBoxLayout(), startButton, quit_button)

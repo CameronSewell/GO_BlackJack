@@ -96,7 +96,7 @@ func (p *Player) GetName() string {
 // Make the player hit the deck
 func (p *Player) PlayerHit(dlr *dealer.Dealer) {
 	if !p.Hand.IsBust() && !p.Hand.IsBlackjack() {
-		p.Hand.AddCard(dlr.DealCard())
+		p.Hand.AddCard(dlr.DealCard(), false)
 		p.action = HIT
 	} else {
 		p.action = STAND
