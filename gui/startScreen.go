@@ -2,8 +2,8 @@ package gui
 
 import (
 	"log"
-	"main/Game"
 	"main/ai"
+	"main/game"
 
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -36,13 +36,13 @@ func StartScreen() {
 			} else if value == "Aggressive" {
 				threshold = ai.AGGRESSIVE
 			}
-			names := []string{"Player", "AI"}
+			names := []string{"player", "AI"}
 			thresholds := []float32{threshold}
-			Game.NewGame(names, thresholds)
+			game.NewGame(names, thresholds)
 
 			log.Println("Radio set to", value)
 			myWindow.SetContent(GameScreen())
-			Game.StartGame(25)
+			game.StartGame(25)
 		})
 
 		myWindow.SetContent(container.NewVBox(difficultySelector, radio))

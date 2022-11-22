@@ -3,6 +3,8 @@ package dealer
 import (
 	"log"
 	"main/cards"
+	"main/guistate"
+	"time"
 )
 
 // Defines a dealer with a total, their
@@ -19,14 +21,14 @@ func NewDealer() Dealer {
 		Hand: cards.NewHand(),
 		deck: cards.NewDeck(),
 	}
-
+	dealer.deck.ShuffleDeck()
 	return dealer
 }
 
 // Deal two cards to the given hand to start the game
-func (d *Dealer) DealStartingHand(hand *cards.Hand) {
+func (d *Dealer) DealStartingHand(hand *cards.Hand, isPlayer bool) {
 	for i := 0; i < 2; i++ {
-		hand.AddCard(d.DealCard(), false)
+		hand.AddCard(d.DealCard(), isPlayer)
 	}
 }
 
@@ -45,5 +47,7 @@ func (d *Dealer) DealCard() cards.Card {
 func (d *Dealer) DealerPlay() {
 	for d.Hand.GetHandTotal() < 17 {
 		d.Hand.AddCard(d.DealCard(), false)
+		guistate.SetCards(d.Hand, guistate.DealerHand, true)
+		time.Sleep(time.Second)
 	}
 }

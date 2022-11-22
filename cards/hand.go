@@ -55,12 +55,19 @@ func (h *Hand) GetCards() []Card {
 	return h.cards
 }
 
+// Set all cards to up at the end of the game
 func (h *Hand) SetUp() {
 	for i := 0; i < len(h.isFaceUp); i++ {
 		h.isFaceUp[i] = true
 	}
 }
 
+// Set the first card to show
+func (h *Hand) SetFirstUp() {
+	h.isFaceUp[0] = true
+}
+
+// Get the up status of each card
 func (h *Hand) GetFaceUp() []bool {
 	return h.isFaceUp
 }

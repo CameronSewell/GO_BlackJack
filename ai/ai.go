@@ -2,8 +2,10 @@ package ai
 
 import (
 	dealer "main/Dealer"
+	"main/guistate"
 	"main/player"
 	"math/rand"
+	"time"
 )
 
 // Represents an AI player with an internal
@@ -36,17 +38,19 @@ func (aiPlayer *AI) PlaceBet() {
 
 // AI player keeps hitting until they choose not to or
 // They cannot
-func (aiPlayer *AI) AIPlay(dlr *dealer.Dealer) {
+func (aiPlayer *AI) AIPlay(dlr *dealer.Dealer, i int) {
 	var hit bool
 	for hit {
 		//Hit if the randomly generated float between 0 and 1
 		//Is greater than the threshold
 		if rand.Float32() > aiPlayer.threshold {
-			aiPlayer.Plr.PlayerHit(dlr)
+			aiPlayer.Plr.PlayerHit(dlr, false)
+			guistate.SetCards(aiPlayer.Plr.Hand, guistate.AiPlayersHands[i], true)
+			time.Sleep(time.Second)
 			//Else stand and stop taking hits
 		} else {
 			hit = false
-			aiPlayer.Plr.PlayerHit(dlr)
+			aiPlayer.Plr.PlayerStand()
 		}
 	}
 }
