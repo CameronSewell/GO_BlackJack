@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
 )
 
 var imageWidth float32 = float32(234)
@@ -15,6 +16,12 @@ var cardSize fyne.Size = fyne.Size{Width: imageWidth, Height: imageHeight}
 var DealerHand *fyne.Container
 var PlayerHand *fyne.Container
 var AiPlayersHands []*fyne.Container
+
+var BetString binding.String
+var TotalPotString binding.String
+var TotalHandString binding.String
+
+var GameWindow fyne.Window
 
 func chooseCard(c cards.Card, isUp bool) *canvas.Image {
 	var image = canvas.NewImageFromFile("gui/svg_playing_cards/backs/png_96_dpi/blue.png")
@@ -54,6 +61,6 @@ func SetCards(h cards.Hand, c *fyne.Container, wait bool) {
 
 	//set chosen container to the new cards
 	if wait {
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(750 * time.Millisecond)
 	}
 }

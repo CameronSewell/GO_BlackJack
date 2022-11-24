@@ -1,7 +1,7 @@
 package ai
 
 import (
-	dealer "main/Dealer"
+	"main/dealer"
 	"main/guistate"
 	"main/player"
 	"math/rand"

@@ -1,8 +1,8 @@
 package player
 
 import (
-	dealer "main/Dealer"
 	"main/cards"
+	"main/dealer"
 	"main/result"
 )
 

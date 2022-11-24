@@ -1,9 +1,10 @@
 package game
 
-import ("fmt"
-	dealer "main/Dealer"
+import (
+	"fmt"
 	"main/ai"
 	"main/cards"
+	"main/dealer"
 	"main/guistate"
 	"main/player"
 	"main/result"
@@ -55,8 +56,14 @@ func StartGame(bet float32) {
 	if gm.state == GAME_START {
 		gm.dlr = dealer.NewDealer()
 		gm.player.PlaceBet(bet)
+
+		guistate.BetString.Set(fmt.Sprintf("Bet: %.2f", bet))
+		guistate.TotalPotString.Set(fmt.Sprintf("Bet: %.2f", gm.player.GetMoney()))
+
 		gm.dlr.DealStartingHand(&gm.player.Hand, true)
 		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
+
+		guistate.TotalHandString.Set(fmt.Sprintf("Your hand: Total %d", gm.player.GetTotal()))
 
 		//Place new bets for everyone and remake starting hands
 		for i := 0; i < len(gm.aiPlayers); i++ {
@@ -168,23 +175,23 @@ func EndGame() {
 			gm.aiPlayers[i].Plr.CloseBet(r)
 		}
 		r = getResult(gm.player.Hand)
-		gm.player.Hand.SetUp()
-		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, false)
 		gm.player.CloseBet(r)
+		gm.player.Hand.SetUp()
+		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
 	}
 }
 
-// Get the number of players playing the game
+// Get the number of plers playing the game
 func GetAICount() int {
 	return len(gm.aiPlayers)
 }
 
-// Get the player at the specified index
+// Get the player at the specifieindex
 func GetPlayer() *player.Player {
 	return &gm.player
 }
 
-// Get the AI at the specific index
+// Get the AI at the specic index
 func GetAI(i int) ai.AI {
 	return gm.aiPlayers[i]
 }

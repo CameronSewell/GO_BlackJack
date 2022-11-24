@@ -43,9 +43,9 @@ func GameScreen() *fyne.Container {
 		standButton, layout.NewSpacer(), layout.NewSpacer())
 
 	//Game's labels
-	betLabel := widget.NewLabel("Bet: ")
-	totalPotLabel := widget.NewLabel("$: ")
-	playerHandLabel := widget.NewLabel("Your hand: ")
+	betLabel := widget.NewLabelWithData(guistate.BetString)
+	totalPotLabel := widget.NewLabelWithData(guistate.TotalPotString)
+	playerHandLabel := widget.NewLabelWithData(guistate.TotalHandString)
 	dealerHandLabel := widget.NewLabel("Dealer's hand: ")
 	aiOneHandLabel := widget.NewLabel("Player 1's hand: ")
 	aiTwoHandLabel := widget.NewLabel("Player 2's hand: ")
