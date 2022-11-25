@@ -13,11 +13,21 @@ import (
 )
 
 func EndScreen() {
+
+	potTotal, err := guistate.PotTotal.Get()
+	if err != nil {
+		panic(err)
+	}
+
 	gameOverText := canvas.NewText("Game Over", color.White)
 	gameOverText.TextSize = 50
 	gameOverAlign := container.NewHBox(layout.NewSpacer(), layout.NewSpacer(), gameOverText, layout.NewSpacer(), layout.NewSpacer())
 	newGameButton := widget.NewButton("Keep Playing", func() {
-		GameScreen()
+		if potTotal > 0 {
+			GameScreen()
+		} else {
+			ShowErrorPopup("You are out of money and cannot keep playing.")
+		}
 	})
 	endButton := widget.NewButton("Quit To Start Screen", func() {
 		StartScreen()
@@ -31,13 +41,10 @@ func EndScreen() {
 		outcome = widget.NewLabel("You won!")
 	} else if guistate.PlayerResult == result.LOSS {
 		outcome = widget.NewLabel("You lost.")
+	} else if guistate.PlayerResult == result.SURRENDER {
+		outcome = widget.NewLabel("You surrendered your hand.")
 	} else {
 		outcome = widget.NewLabel("You tied!")
-	}
-
-	potTotal, err := guistate.PotTotal.Get()
-	if err != nil {
-		panic(err)
 	}
 
 	handResult = widget.NewLabelWithData(guistate.TotalHandString)
@@ -58,7 +65,7 @@ func EndScreen() {
 		}
 
 		handResult = widget.NewLabel(fmt.Sprintf("Player's %d hand value is %d", i+1, guistate.AIHandTotals[i]))
-		payoutResult = widget.NewLabel(fmt.Sprintf("Player %d's payout is %.2f$", i+1, guistate.AIPotTotals[i]))
+		payoutResult = widget.NewLabel(fmt.Sprintf("Player %d's payout is %.2f$", i+1, guistate.AIPayouts[i]))
 		potResult = widget.NewLabel(fmt.Sprintf("Player %d's money is now %.2f$", i+1, guistate.AIPotTotals[i]))
 		aiResultsContainer.Add(container.New(layout.NewVBoxLayout(), outcome, handResult, payoutResult, potResult))
 	}

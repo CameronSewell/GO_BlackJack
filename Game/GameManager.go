@@ -8,6 +8,7 @@ import (
 	"main/guistate"
 	"main/player"
 	"main/result"
+	"time"
 )
 
 // Represents the game state
@@ -44,10 +45,15 @@ func updatePlayerHandTotal() {
 }
 
 func updatePlayerPot() {
-	guistate.PlayerBet.Set(float64(gm.player.GetBet()))
+	var bet float64 = 0
+	if gm.player.GetPlayerAction() != player.SURRENDER {
+		bet = float64(gm.player.GetBet())
+	}
+	guistate.PlayerBet.Set(bet)
 	guistate.PotTotal.Set(float64(gm.player.GetMoney()))
 }
 
+//Get the count of AI players inthis game
 func GetAICount() int {
 	return len(gm.aiPlayers)
 }
@@ -57,12 +63,23 @@ func GetPlayer() *player.Player {
 	return &gm.player
 }
 
+//Return true if it's the player turn
 func IsPlayerTurn() bool {
 	return gm.state == PLAYER_TURN
 }
 
+func CanPlayerHit() bool {
+	var action player.PlayerAction = gm.player.GetPlayerAction()
+	return (action == player.HIT || action == player.START) && !gm.player.Hand.IsBust() && IsPlayerTurn()
+}
+
+func CanPlayerDouble() bool {
+	var action player.PlayerAction = gm.player.GetPlayerAction()
+	return action == player.START && !gm.player.Hand.IsBust() && IsPlayerTurn()
+}
+
 // Create a new game and initialize all players
-func NewGame(names []string, thresholds []float32) {
+func NewGame(names []string, thresholds []float64) {
 	gm = GameManager{}
 	gm.player = player.NewPlayer(names[0])
 	gm.aiPlayers = make([]ai.AI, len(thresholds))
@@ -118,14 +135,29 @@ func StartGame(bet float32) {
 	}
 }
 
+func playerHit() {
+	gm.player.PlayerHit(&gm.dlr, true)
+	guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
+	updatePlayerHandTotal()
+}
+
 // TODO: Figure out how to connect this to the frontend
 func PlayerMove(action player.PlayerAction) {
 	if gm.state == PLAYER_TURN {
 		switch action {
 		case player.HIT:
-			gm.player.PlayerHit(&gm.dlr, true)
-			guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
-			updatePlayerHandTotal()
+			playerHit()
+		case player.DOUBLE:
+			playerHit()
+			gm.player.DoubleBet()
+			updatePlayerPot()
+			gm.state = DEALER_TURN
+			DealerMoves()
+		case player.SURRENDER:
+			gm.player.Surrender()
+			gm.state = DEALER_TURN
+			updatePlayerPot()
+			DealerMoves()
 		case player.STAND:
 			gm.player.PlayerStand()
 			gm.state = DEALER_TURN
@@ -215,7 +247,12 @@ func EndGame() {
 			guistate.AIResults[i] = r
 			guistate.AIPotTotals[i] = gm.aiPlayers[i].Plr.GetMoney()
 		}
-		r = getResult(gm.player.Hand)
+
+		if gm.player.GetPlayerAction() == player.SURRENDER {
+			r = result.SURRENDER
+		} else {
+			r = getResult(gm.player.Hand)
+		}
 
 		guistate.PlayerPayout = gm.player.CloseBet(r)
 		guistate.PlayerResult = r
@@ -224,7 +261,9 @@ func EndGame() {
 		updatePlayerPot()
 
 		gm.player.Hand.SetUp()
-		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
+		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, false)
+
+		time.Sleep(2*time.Second)
 		
 		EndScreen()
 	}

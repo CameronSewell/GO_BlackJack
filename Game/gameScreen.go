@@ -32,7 +32,7 @@ func showBetPopup() {
 	modal.Show()
 }
 
-func showErrorPopup(message string) {
+func ShowErrorPopup(message string) {
 	var errorModal *widget.PopUp
 	errorModal = widget.NewModalPopUp(container.New(
 		layout.NewVBoxLayout(),
@@ -51,27 +51,27 @@ func MakeCardContainer() *fyne.Container {
 
 func GameScreen() {
 	//Set of buttons and container for them
-	hitButton := widget.NewButton("Hit", func() {
-		if !GetPlayer().Hand.IsBust() {
-			PlayerMove(player.HIT)
+
+	doubleButton := widget.NewButton("Double", func() {
+		if CanPlayerDouble() {
+			PlayerMove(player.DOUBLE)
 		} else {
-			showErrorPopup("You hand is busted. You must stand.")
+			ShowErrorPopup("You cannot double your wager.")
 		}
 	})
-	splitButton := widget.NewButton("Split", func() { log.Println("split button tapped") })
-	doubleButton := widget.NewButton("Double", func() {
-		if !GetPlayer().Hand.IsBust() {
+	hitButton := widget.NewButton("Hit", func() {
+		if CanPlayerHit() {
 			PlayerMove(player.HIT)
 		} else {
-			showErrorPopup("You hand is busted. You must stand.")
+			ShowErrorPopup("You hand is busted. You must stand.")
 		}
 	})
 	surrenderButton := widget.NewButton("Surrender", func() {
 		log.Println("surrender button tapped")
-		StartScreen()
+		PlayerMove(player.SURRENDER)
 	})
 	standButton := widget.NewButton("Stand", func() { PlayerMove(player.STAND) })
-	gameButtons := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), layout.NewSpacer(), hitButton, surrenderButton, doubleButton, splitButton,
+	gameButtons := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), layout.NewSpacer(), hitButton, surrenderButton, doubleButton,
 		standButton, layout.NewSpacer(), layout.NewSpacer())
 
 	//Game's labels

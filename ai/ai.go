@@ -12,7 +12,7 @@ import (
 // Player struct and a threshold
 type AI struct {
 	Plr       player.Player
-	threshold float32
+	threshold float64
 }
 
 const (
@@ -22,7 +22,7 @@ const (
 )
 
 // Return a new AI struct with its
-func NewAI(threshold float32, name string) AI {
+func NewAI(threshold float64, name string) AI {
 	aiPlayer := AI{
 		Plr:       player.NewPlayer(name),
 		threshold: threshold,
@@ -32,6 +32,7 @@ func NewAI(threshold float32, name string) AI {
 
 // Place a bet for the AI
 func (aiPlayer *AI) PlaceBet() {
+	rand.Seed(time.Now().UnixNano())
 	bet := player.MinBet + rand.Float32()*(player.MaxBet-player.MinBet)
 	aiPlayer.Plr.PlaceBet(bet)
 }
@@ -39,18 +40,17 @@ func (aiPlayer *AI) PlaceBet() {
 // AI player keeps hitting until they choose not to or
 // They cannot
 func (aiPlayer *AI) AIPlay(dlr *dealer.Dealer, i int) {
-	var hit bool
-	for hit {
+	rand.Seed(time.Now().UnixNano())
+	var hit bool = rand.Float64() < aiPlayer.threshold
+	for hit && !aiPlayer.Plr.Hand.IsBust() {
 		//Hit if the randomly generated float between 0 and 1
 		//Is greater than the threshold
-		if rand.Float32() > aiPlayer.threshold {
-			aiPlayer.Plr.PlayerHit(dlr, false)
-			guistate.SetCards(aiPlayer.Plr.Hand, guistate.AiPlayersHands[i], true)
-			time.Sleep(time.Second)
-			//Else stand and stop taking hits
-		} else {
-			hit = false
-			aiPlayer.Plr.PlayerStand()
-		}
+		rand.Seed(time.Now().UnixNano())
+
+		aiPlayer.Plr.PlayerHit(dlr, false)
+		guistate.SetCards(aiPlayer.Plr.Hand, guistate.AiPlayersHands[i], true)
+		hit = rand.Float64() < aiPlayer.threshold
 	}
+	hit = false
+	aiPlayer.Plr.PlayerStand()
 }

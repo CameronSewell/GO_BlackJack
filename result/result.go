@@ -6,4 +6,5 @@ const (
 	TIE Result = iota
 	WIN
 	LOSS
+	SURRENDER
 )

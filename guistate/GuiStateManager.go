@@ -77,6 +77,6 @@ func SetCards(h cards.Hand, c *fyne.Container, wait bool) {
 
 	//set chosen container to the new cards
 	if wait {
-		time.Sleep(750 * time.Millisecond)
+		time.Sleep(time.Second)
 	}
 }

@@ -26,7 +26,7 @@ func StartScreen() {
 
 		radio := widget.NewRadioGroup([]string{"Mild", "Moderate", "Aggressive"}, func(value string) {
 
-			var threshold float32
+			var threshold float64
 			if value == "Mild" {
 				threshold = ai.MILD
 			} else if value == "Moderate" {
@@ -35,7 +35,7 @@ func StartScreen() {
 				threshold = ai.AGGRESSIVE
 			}
 			names := []string{"player", "AI"}
-			thresholds := []float32{threshold}
+			thresholds := []float64{threshold}
 			NewGame(names, thresholds)
 
 			log.Println("Radio set to", value)
