@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"main/gui"
+	"main/game"
 )
 
 func main() {
 	fmt.Println("Starting Blackjack game")
-	gui.StartScreen()
+	game.LaunchGame()
 }

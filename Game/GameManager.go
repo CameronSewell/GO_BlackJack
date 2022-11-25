@@ -33,8 +33,32 @@ type GameManager struct {
 // Contains the current state of the running game
 var gm GameManager
 
-func GetState() GameState {
-	return gm.state
+func updatePlayerHandTotal() {
+	var additionalStatus string = ""
+	if gm.player.Hand.IsBlackjack() {
+		additionalStatus = "(Blackjack)"
+	} else if gm.player.Hand.IsBust() {
+		additionalStatus = "(Busted)"
+	}
+	guistate.TotalHandString.Set(fmt.Sprintf("Your hand: Total %d %s", gm.player.Hand.GetHandTotal(), additionalStatus))
+}
+
+func updatePlayerPot() {
+	guistate.PlayerBet.Set(float64(gm.player.GetBet()))
+	guistate.PotTotal.Set(float64(gm.player.GetMoney()))
+}
+
+func GetAICount() int {
+	return len(gm.aiPlayers)
+}
+
+// Get the player at the pecifiedx
+func GetPlayer() *player.Player {
+	return &gm.player
+}
+
+func IsPlayerTurn() bool {
+	return gm.state == PLAYER_TURN
 }
 
 // Create a new game and initialize all players
@@ -50,20 +74,25 @@ func NewGame(names []string, thresholds []float32) {
 	gm.state = GAME_START
 }
 
-// Create a new game and initialize everyone
+// Create a new game with a new bet and start it
 func StartGame(bet float32) {
 	//Initialize new dealer
+	if gm.state == GAME_END {
+		gm.state = GAME_START
+	}
 	if gm.state == GAME_START {
 		gm.dlr = dealer.NewDealer()
 		gm.player.PlaceBet(bet)
 
-		guistate.BetString.Set(fmt.Sprintf("Bet: %.2f", bet))
-		guistate.TotalPotString.Set(fmt.Sprintf("Bet: %.2f", gm.player.GetMoney()))
 
+		updatePlayerPot()
+
+		gm.player.ResetHand()
 		gm.dlr.DealStartingHand(&gm.player.Hand, true)
 		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
+		updatePlayerHandTotal()
 
-		guistate.TotalHandString.Set(fmt.Sprintf("Your hand: Total %d", gm.player.GetTotal()))
+		guistate.TotalHandString.Set(fmt.Sprintf("Your hand: Total %d", gm.player.Hand.GetHandTotal()))
 
 		//Place new bets for everyone and remake starting hands
 		for i := 0; i < len(gm.aiPlayers); i++ {
@@ -73,6 +102,7 @@ func StartGame(bet float32) {
 			gm.aiPlayers[i].PlaceBet()
 
 			//Create a starting hand
+			gm.aiPlayers[i].Plr.ResetHand()
 			gm.dlr.DealStartingHand(&gm.aiPlayers[i].Plr.Hand, false)
 			guistate.SetCards(gm.aiPlayers[i].Plr.Hand, guistate.AiPlayersHands[i], true)
 		}
@@ -95,6 +125,7 @@ func PlayerMove(action player.PlayerAction) {
 		case player.HIT:
 			gm.player.PlayerHit(&gm.dlr, true)
 			guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
+			updatePlayerHandTotal()
 		case player.STAND:
 			gm.player.PlayerStand()
 			gm.state = DEALER_TURN
@@ -166,32 +197,37 @@ func EndGame() {
 		var r result.Result
 		gm.dlr.Hand.SetUp()
 		guistate.SetCards(gm.dlr.Hand, guistate.DealerHand, false)
+
+		guistate.AIHandTotals = make([]int, len(gm.aiPlayers))
+		guistate.AIResults = make([]result.Result, len(gm.aiPlayers))
+		guistate.AIPotTotals = make([]float32, len(gm.aiPlayers))
+		guistate.AIPayouts = make([]float32, len(gm.aiPlayers))
+
 		for i := 0; i < len(gm.aiPlayers); i++ {
 			gm.aiPlayers[i].Plr.Hand.SetUp()
 			guistate.SetCards(gm.aiPlayers[i].Plr.Hand, guistate.AiPlayersHands[i], false)
 			r = getResult(gm.aiPlayers[i].Plr.Hand)
 
 			//Update the bets of the AI players
-			gm.aiPlayers[i].Plr.CloseBet(r)
+			guistate.AIPayouts[i] = gm.aiPlayers[i].Plr.CloseBet(r)
+
+			guistate.AIHandTotals[i] = gm.aiPlayers[i].Plr.Hand.GetHandTotal()
+			guistate.AIResults[i] = r
+			guistate.AIPotTotals[i] = gm.aiPlayers[i].Plr.GetMoney()
 		}
 		r = getResult(gm.player.Hand)
-		gm.player.CloseBet(r)
+
+		guistate.PlayerPayout = gm.player.CloseBet(r)
+		guistate.PlayerResult = r
+		guistate.PlayerHandTotal = gm.player.Hand.GetHandTotal()
+
+		updatePlayerPot()
+
 		gm.player.Hand.SetUp()
 		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, true)
+		
+		EndScreen()
 	}
 }
 
-// Get the number of plers playing the game
-func GetAICount() int {
-	return len(gm.aiPlayers)
-}
 
-// Get the player at the specifieindex
-func GetPlayer() *player.Player {
-	return &gm.player
-}
-
-// Get the AI at the specic index
-func GetAI(i int) ai.AI {
-	return gm.aiPlayers[i]
-}

@@ -2,11 +2,13 @@ package guistate
 
 import (
 	"main/cards"
+	"main/result"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/layout"
 )
 
 var imageWidth float32 = float32(234)
@@ -17,20 +19,33 @@ var DealerHand *fyne.Container
 var PlayerHand *fyne.Container
 var AiPlayersHands []*fyne.Container
 
-var BetString binding.String
-var TotalPotString binding.String
-var TotalHandString binding.String
+var PlayerBet binding.Float = binding.NewFloat()
+var PotTotal binding.Float = binding.NewFloat()
+
+var BetString binding.String = binding.FloatToStringWithFormat(PlayerBet, "Bet: %.2f$")
+var TotalPotString binding.String = binding.FloatToStringWithFormat(PotTotal, "Money: %.2f$")
+var TotalHandString binding.String = binding.NewString()
+
+var PlayerResult result.Result
+var PlayerPayout float32
+var PlayerHandTotal int
+
+var AIHandTotals []int
+var AIPotTotals []float32
+var AIPayouts []float32
+var AIResults []result.Result
 
 var GameWindow fyne.Window
+var GameApp fyne.App
 
 func chooseCard(c cards.Card, isUp bool) *canvas.Image {
-	var image = canvas.NewImageFromFile("gui/svg_playing_cards/backs/png_96_dpi/blue.png")
+	var image = canvas.NewImageFromFile("game/svg_playing_cards/backs/png_96_dpi/blue.png")
 
 	//If it is face up change image from back to the corresponding front of the given card
 
 	if isUp {
 		strValue := c.String()
-		image = canvas.NewImageFromFile("gui/svg_playing_cards/fronts/png_96_dpi/" + strValue + ".png")
+		image = canvas.NewImageFromFile("game/svg_playing_cards/fronts/png_96_dpi/" + strValue + ".png")
 	}
 
 	return image
@@ -54,6 +69,7 @@ func SetCards(h cards.Hand, c *fyne.Container, wait bool) {
 		e.FillMode = canvas.ImageFillOriginal //set fill mode for the card image
 		e.Resize(cardSize)
 		c.Add(e)
+		c.Add(layout.NewSpacer())
 	}
 
 	//add padding at the end of the new container to center cards

@@ -1,12 +1,11 @@
-package gui
+package game
 
 import (
 	"log"
 	"main/ai"
-	"main/game"
 	"main/guistate"
+	"os"
 
-	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
@@ -14,9 +13,7 @@ import (
 )
 
 func StartScreen() {
-	myApp := app.New()
-	guistate.GameWindow = myApp.NewWindow("Blackjack")
-	image := canvas.NewImageFromFile("gui/blacklogo-removebg-preview.png")
+	image := canvas.NewImageFromFile("game/blacklogo-removebg-preview.png")
 	image.FillMode = canvas.ImageFillOriginal
 	image.Show()
 
@@ -39,11 +36,10 @@ func StartScreen() {
 			}
 			names := []string{"player", "AI"}
 			thresholds := []float32{threshold}
-			game.NewGame(names, thresholds)
+			NewGame(names, thresholds)
 
 			log.Println("Radio set to", value)
-			guistate.GameWindow.SetContent(GameScreen())
-			game.StartGame(25)
+			GameScreen()
 		})
 
 		guistate.GameWindow.SetContent(container.NewVBox(difficultySelector, radio))
@@ -51,11 +47,10 @@ func StartScreen() {
 
 	quit_button := widget.NewButton("Quit", func() {
 		log.Println("tapped")
-		guistate.GameWindow.SetContent(EndScreen())
+		os.Exit(0)
 	})
 
 	game_buttons := container.New(layout.NewHBoxLayout(), startButton, quit_button)
 	bottom := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), game_buttons, layout.NewSpacer())
 	guistate.GameWindow.SetContent(container.New(layout.NewVBoxLayout(), centeredImage, layout.NewSpacer(), bottom))
-	guistate.GameWindow.ShowAndRun()
 }

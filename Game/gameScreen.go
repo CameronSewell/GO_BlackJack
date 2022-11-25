@@ -1,44 +1,76 @@
-package gui
+package game
 
 import (
-	"fmt"
-	"image/color"
 	"log"
-	"main/game"
 	"main/guistate"
 	"main/player"
-	"os"
+	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
+func showBetPopup() {
+	var modal *widget.PopUp
+	input := widget.NewEntry()
+	modal = widget.NewModalPopUp(container.New(
+		layout.NewHBoxLayout(),
+		widget.NewLabel("Enter your bet:"),
+		input,
+		widget.NewButton("Enter", func() {
+			modal.Hide()
+			if bet, err := strconv.ParseFloat(input.Text, 32); err == nil {
+				StartGame(float32(bet))
+			} else {
+				panic(err)
+			}
+		}),
+	),
+		guistate.GameWindow.Canvas())
+	modal.Show()
+}
+
+func showErrorPopup(message string) {
+	var errorModal *widget.PopUp
+	errorModal = widget.NewModalPopUp(container.New(
+		layout.NewVBoxLayout(),
+		widget.NewLabel(message),
+		widget.NewButton("Close", func() {
+			errorModal.Hide()
+		}),
+	),
+		guistate.GameWindow.Canvas())
+	errorModal.Show()
+}
+
 func MakeCardContainer() *fyne.Container {
 	return container.New(layout.NewHBoxLayout(), layout.NewSpacer())
 }
 
-// can set these by saying gui.DealerHand := gui.SetCards(Dealer.Hand)
-
-func GameScreen() *fyne.Container {
-
+func GameScreen() {
 	//Set of buttons and container for them
 	hitButton := widget.NewButton("Hit", func() {
-		if !game.GetPlayer().Hand.IsBust() {
-			game.PlayerMove(player.HIT)
+		if !GetPlayer().Hand.IsBust() {
+			PlayerMove(player.HIT)
 		} else {
-			fmt.Println("Your Hand is busted. Cannot hit again.")
+			showErrorPopup("You hand is busted. You must stand.")
 		}
 	})
 	splitButton := widget.NewButton("Split", func() { log.Println("split button tapped") })
-	doubleButton := widget.NewButton("Double", func() { log.Println("double button tapped") })
+	doubleButton := widget.NewButton("Double", func() {
+		if !GetPlayer().Hand.IsBust() {
+			PlayerMove(player.HIT)
+		} else {
+			showErrorPopup("You hand is busted. You must stand.")
+		}
+	})
 	surrenderButton := widget.NewButton("Surrender", func() {
 		log.Println("surrender button tapped")
-		EndScreen()
+		StartScreen()
 	})
-	standButton := widget.NewButton("Stand", func() { game.PlayerMove(player.STAND) })
+	standButton := widget.NewButton("Stand", func() { PlayerMove(player.STAND) })
 	gameButtons := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), layout.NewSpacer(), hitButton, surrenderButton, doubleButton, splitButton,
 		standButton, layout.NewSpacer(), layout.NewSpacer())
 
@@ -46,8 +78,8 @@ func GameScreen() *fyne.Container {
 	betLabel := widget.NewLabelWithData(guistate.BetString)
 	totalPotLabel := widget.NewLabelWithData(guistate.TotalPotString)
 	playerHandLabel := widget.NewLabelWithData(guistate.TotalHandString)
-	dealerHandLabel := widget.NewLabel("Dealer's hand: ")
-	aiOneHandLabel := widget.NewLabel("Player 1's hand: ")
+	dealerHandLabel := widget.NewLabel("Dealer's Hand:")
+	aiOneHandLabel := widget.NewLabel("Player 1's Hand: ")
 	aiTwoHandLabel := widget.NewLabel("Player 2's hand: ")
 
 	//Aligning game labels left
@@ -66,7 +98,7 @@ func GameScreen() *fyne.Container {
 	//Dealer card set up
 	dealerCardAlignment := guistate.DealerHand
 
-	aiCount := game.GetAICount()
+	aiCount := GetAICount()
 	guistate.AiPlayersHands = make([]*fyne.Container, aiCount)
 	for i := 0; i < aiCount; i++ {
 		guistate.AiPlayersHands[i] = MakeCardContainer()
@@ -92,25 +124,6 @@ func GameScreen() *fyne.Container {
 	//Putting it all together
 	retVal := container.New(layout.NewVBoxLayout(), labelAlignment, layout.NewSpacer(), layout.NewSpacer(), gameButtons)
 
-	return retVal
-}
-
-func EndScreen() *fyne.Container {
-	gameOverText := canvas.NewText("Game Over", color.White)
-	gameOverText.TextSize = 50
-	gameOverAlign := container.NewHBox(layout.NewSpacer(), layout.NewSpacer(), gameOverText, layout.NewSpacer(), layout.NewSpacer())
-	newGameButton := widget.NewButton("New Game", func() {
-		log.Println("double button tapped")
-		StartScreen()
-	})
-	endButton := widget.NewButton("Exit", func() {
-		log.Println("split button tapped")
-		os.Exit(0)
-	})
-
-	choiceButtons := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), newGameButton, endButton, layout.NewSpacer())
-
-	retVal := container.New(layout.NewVBoxLayout(), gameOverAlign, layout.NewSpacer(), choiceButtons, layout.NewSpacer(), layout.NewSpacer())
-
-	return retVal
+	guistate.GameWindow.SetContent(retVal)
+	showBetPopup()
 }

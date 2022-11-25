@@ -58,19 +58,21 @@ func (p *Player) PlaceBet(amount float32) {
 // Close the player's bet and give them twice the money
 // They bet if they win, their money back if they tie,
 // Or none of it if they lose
-func (p *Player) CloseBet(res result.Result) {
+func (p *Player) CloseBet(res result.Result) float32 {
+	var payout float32 = 0
 	switch res {
 	case result.WIN:
-		p.money += 2 * p.bet
+		payout = 2 * p.bet
 
 	case result.TIE:
-		p.money += p.bet
+		payout = p.bet
 
 	case result.LOSS:
 		break
 	}
 
-	p.bet = 0
+	p.money += payout
+	return payout
 }
 
 // Get the current bet of the player
@@ -111,4 +113,8 @@ func (p *Player) PlayerStand() {
 // Get the current action the player is taking
 func (p *Player) GetPlayerAction() PlayerAction {
 	return p.action
+}
+
+func (p *Player) ResetHand() {
+	p.Hand = cards.NewHand()
 }
