@@ -47,9 +47,9 @@ func EndScreen() {
 		outcome = widget.NewLabel("You tied!")
 	}
 
-	handResult = widget.NewLabelWithData(guistate.TotalHandString)
+	handResult = widget.NewLabel(fmt.Sprintf("Your hand value was %d", GetPlayer().Hand.GetHandTotal()))
 	payoutResult = widget.NewLabel(fmt.Sprintf("Your payout is %.2f$", guistate.PlayerPayout))
-	potResult = widget.NewLabel(fmt.Sprintf("Your money is now %.2f$", potTotal))
+	potResult = widget.NewLabel(fmt.Sprintf("Your money is now %.2f$", GetPlayer().GetMoney()))
 
 	playerResultsContainer := container.New(layout.NewVBoxLayout(), outcome, handResult, payoutResult, potResult)
 
@@ -64,9 +64,9 @@ func EndScreen() {
 			outcome = widget.NewLabel(fmt.Sprintf("Player %d tied!", i+1))
 		}
 
-		handResult = widget.NewLabel(fmt.Sprintf("Player's %d hand value is %d", i+1, guistate.AIHandTotals[i]))
+		handResult = widget.NewLabel(fmt.Sprintf("Player's %d hand value is %d", i+1, GetAIPlayer(i).Plr.Hand.GetHandTotal()))
 		payoutResult = widget.NewLabel(fmt.Sprintf("Player %d's payout is %.2f$", i+1, guistate.AIPayouts[i]))
-		potResult = widget.NewLabel(fmt.Sprintf("Player %d's money is now %.2f$", i+1, guistate.AIPotTotals[i]))
+		potResult = widget.NewLabel(fmt.Sprintf("Player %d's money is now %.2f$", i+1, GetAIPlayer(i).Plr.GetMoney()))
 		aiResultsContainer.Add(container.New(layout.NewVBoxLayout(), outcome, handResult, payoutResult, potResult))
 	}
 

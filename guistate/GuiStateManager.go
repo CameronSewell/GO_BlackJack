@@ -28,10 +28,7 @@ var TotalHandString binding.String = binding.NewString()
 
 var PlayerResult result.Result
 var PlayerPayout float32
-var PlayerHandTotal int
 
-var AIHandTotals []int
-var AIPotTotals []float32
 var AIPayouts []float32
 var AIResults []result.Result
 

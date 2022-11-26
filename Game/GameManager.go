@@ -58,6 +58,11 @@ func GetAICount() int {
 	return len(gm.aiPlayers)
 }
 
+//Get the ith AI player in the game
+func GetAIPlayer(i int) *ai.AI {
+	return &gm.aiPlayers[i]
+}
+
 // Get the player at the pecifiedx
 func GetPlayer() *player.Player {
 	return &gm.player
@@ -230,9 +235,8 @@ func EndGame() {
 		gm.dlr.Hand.SetUp()
 		guistate.SetCards(gm.dlr.Hand, guistate.DealerHand, false)
 
-		guistate.AIHandTotals = make([]int, len(gm.aiPlayers))
+		
 		guistate.AIResults = make([]result.Result, len(gm.aiPlayers))
-		guistate.AIPotTotals = make([]float32, len(gm.aiPlayers))
 		guistate.AIPayouts = make([]float32, len(gm.aiPlayers))
 
 		for i := 0; i < len(gm.aiPlayers); i++ {
@@ -243,9 +247,7 @@ func EndGame() {
 			//Update the bets of the AI players
 			guistate.AIPayouts[i] = gm.aiPlayers[i].Plr.CloseBet(r)
 
-			guistate.AIHandTotals[i] = gm.aiPlayers[i].Plr.Hand.GetHandTotal()
 			guistate.AIResults[i] = r
-			guistate.AIPotTotals[i] = gm.aiPlayers[i].Plr.GetMoney()
 		}
 
 		if gm.player.GetPlayerAction() == player.SURRENDER {
@@ -256,15 +258,14 @@ func EndGame() {
 
 		guistate.PlayerPayout = gm.player.CloseBet(r)
 		guistate.PlayerResult = r
-		guistate.PlayerHandTotal = gm.player.Hand.GetHandTotal()
 
 		updatePlayerPot()
 
 		gm.player.Hand.SetUp()
 		guistate.SetCards(gm.player.Hand, guistate.PlayerHand, false)
-
-		time.Sleep(2*time.Second)
 		
+		time.Sleep(2*time.Second)
+
 		EndScreen()
 	}
 }

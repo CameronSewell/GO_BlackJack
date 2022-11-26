@@ -47,7 +47,7 @@ func (h *Hand) GetFirstCard() Card {
 func (h *Hand) AddCard(card Card, isUp bool) {
 	h.cards = append(h.cards, card)
 	//Make the card count as 1 if the deck will bust due to an ace
-	if card.Symbol == int(CARD_ACE) && (h.total+int(CARD_ACE)) > Blackjack {
+	if card.Symbol == int(CARD_ACE) && (h.total+11) > Blackjack {
 		card.Value = 1
 	}
 	h.total += card.Value
