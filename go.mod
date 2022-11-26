@@ -2,13 +2,11 @@ module main
 
 go 1.18
 
-require (
-	fyne.io/fyne/v2 v2.2.4
-	golang.org/x/net v0.1.0
-)
+require fyne.io/fyne/v2 v2.2.4
 
 require (
 	github.com/yuin/goldmark v1.4.13 // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 )
 

@@ -7,29 +7,27 @@ import (
 )
 
 // Define the deck size as 52
-const deckSize int = 52
 
 // Card deck definition
 type Deck struct {
-	cards [deckSize]Card
-	index int
+	cards []Card
 }
 
 // Number of cards left
 func (d *Deck) CardsLeft() int {
-	return d.index + 1
+	return len(d.cards)
 }
 
 // Make a 52 new card deck with all 4
 // suits and 14 cards in each suit
 func NewDeck() Deck {
 	d := Deck{}
-	d.index = deckSize - 1
+	d.cards = make([]Card, 0)
 	//Go over all possible suit combinations
 	for j := 0; j < Suits; j++ {
 		//Go over all possible card values
 		for i := 0; i < CardValues; i++ {
-			d.cards[i] = NewCard(i, getSuit(j))
+			d.cards = append(d.cards, NewCard(i, getSuit(j)))
 		}
 	}
 	return d
@@ -56,7 +54,8 @@ func (d *Deck) HitDeck() (*Card, error) {
 	if d.CardsLeft() == 0 {
 		return nil, errors.New("hit last card in deck")
 	}
-	c := &d.cards[d.index]
-	d.index = d.index - 1
-	return c, nil
+	lastIndex := len(d.cards) - 1
+	c := d.cards[lastIndex]
+	d.cards = d.cards[:lastIndex]
+	return &c, nil
 }

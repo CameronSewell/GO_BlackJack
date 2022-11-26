@@ -1,11 +1,11 @@
-package gui
+package game
 
 import (
 	"log"
-	"main/Game"
 	"main/ai"
+	"main/guistate"
+	"os"
 
-	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
@@ -13,9 +13,7 @@ import (
 )
 
 func StartScreen() {
-	myApp := app.New()
-	myWindow := myApp.NewWindow("Blackjack")
-	image := canvas.NewImageFromFile("gui/blacklogo-removebg-preview.png")
+	image := canvas.NewImageFromFile("game/blacklogo-removebg-preview.png")
 	image.FillMode = canvas.ImageFillOriginal
 	image.Show()
 
@@ -24,11 +22,11 @@ func StartScreen() {
 	startButton := widget.NewButton("Start Game", func() {
 		log.Println("start button tapped")
 
-		difficultySelector := widget.NewLabel("Select the aggressiveness of the AI Dealer: ")
+		difficultySelector := widget.NewLabel("Select the aggressiveness of the AI Player: ")
 
 		radio := widget.NewRadioGroup([]string{"Mild", "Moderate", "Aggressive"}, func(value string) {
 
-			var threshold float32
+			var threshold float64
 			if value == "Mild" {
 				threshold = ai.MILD
 			} else if value == "Moderate" {
@@ -36,25 +34,23 @@ func StartScreen() {
 			} else if value == "Aggressive" {
 				threshold = ai.AGGRESSIVE
 			}
-			names := []string{"Player", "AI"}
-			thresholds := []float32{threshold}
-			Game.NewGame(names, thresholds)
+			names := []string{"player", "AI"}
+			thresholds := []float64{threshold}
+			NewGame(names, thresholds)
 
 			log.Println("Radio set to", value)
-			myWindow.SetContent(GameScreen())
-			Game.StartGame(25)
+			GameScreen()
 		})
 
-		myWindow.SetContent(container.NewVBox(difficultySelector, radio))
+		guistate.GameWindow.SetContent(container.NewVBox(difficultySelector, radio))
 	})
 
 	quit_button := widget.NewButton("Quit", func() {
 		log.Println("tapped")
-		myWindow.SetContent(EndScreen())
+		os.Exit(0)
 	})
 
 	game_buttons := container.New(layout.NewHBoxLayout(), startButton, quit_button)
 	bottom := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), game_buttons, layout.NewSpacer())
-	myWindow.SetContent(container.New(layout.NewVBoxLayout(), centeredImage, layout.NewSpacer(), bottom))
-	myWindow.ShowAndRun()
+	guistate.GameWindow.SetContent(container.New(layout.NewVBoxLayout(), centeredImage, layout.NewSpacer(), bottom))
 }

@@ -6,16 +6,17 @@ package cards
  */
 import (
 	"fmt"
+	"strconv"
 )
 
 type CardValue int
 
 // Define constants for creating a deck
-const CardValues int = 14
+const CardValues int = 13
 const Suits int = 4
 
 const (
-	CARD_ONE CardValue = iota
+	CARD_ACE CardValue = iota
 	CARD_TWO
 	CARD_THREE
 	CARD_FOUR
@@ -28,15 +29,14 @@ const (
 	CARD_JACK
 	CARD_QUEEN
 	CARD_KING
-	CARD_ACE //TO-DO: We will need a way to address alternate values for Aces
 )
 
 /* These are unicode values that represent the suits of a typical card deck */
 const (
-	SUIT_SPADES   = "Spades"
-	SUIT_HEARTS   = "Hearts"
-	SUIT_DIAMONDS = "Diamonds"
-	SUIT_CLUBS    = "Clubs"
+	SUIT_SPADES   = "spades"
+	SUIT_HEARTS   = "hearts"
+	SUIT_DIAMONDS = "diamonds"
+	SUIT_CLUBS    = "clubs"
 )
 
 // Represents a single card in a hand.
@@ -57,16 +57,16 @@ func getSuit(Suit int) string {
 	default:
 	case 0:
 		suit = SUIT_SPADES
-		break
+
 	case 1:
 		suit = SUIT_HEARTS
-		break
+
 	case 2:
 		suit = SUIT_DIAMONDS
-		break
+
 	case 3:
 		suit = SUIT_CLUBS
-		break
+
 	}
 	return suit
 }
@@ -77,18 +77,18 @@ func (card Card) String() string {
 
 	switch CardValue(card.Symbol) {
 	default:
-		symbol = fmt.Sprintf("%d", card.Value)
+		symbol = strconv.Itoa(card.Value)
 	case CARD_JACK:
-		symbol = "J"
+		symbol = "jack"
 	case CARD_QUEEN:
-		symbol = "Q"
+		symbol = "queen"
 	case CARD_KING:
-		symbol = "K"
+		symbol = "king"
 	case CARD_ACE:
-		symbol = "A"
+		symbol = "ace"
 	}
 
-	return fmt.Sprintf("%s%c", symbol, card.Suit)
+	return fmt.Sprintf("%s_%s", card.Suit, symbol)
 }
 
 // Creates a new card with the given symbol and suit.

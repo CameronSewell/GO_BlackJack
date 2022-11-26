@@ -1,13 +1,13 @@
 package player
 
 import (
-	dealer "main/Dealer"
 	"main/cards"
+	"main/dealer"
 	"main/result"
 )
 
 // Amount that all players start with
-var StartingAmount float32 = 200
+var StartingAmount float32 = 50
 
 // Max bet that a player can make
 var MaxBet float32 = 50
@@ -20,6 +20,8 @@ const (
 	START PlayerAction = iota
 	HIT
 	STAND
+	DOUBLE
+	SURRENDER
 )
 
 // Defines a player struct
@@ -53,24 +55,42 @@ func (p *Player) PlaceBet(amount float32) {
 	}
 	p.bet = amount
 	p.money -= amount
+	p.action = START
 }
 
 // Close the player's bet and give them twice the money
 // They bet if they win, their money back if they tie,
-// Or none of it if they lose
-func (p *Player) CloseBet(res result.Result) {
+// none if they lose, or half if they surrender
+func (p *Player) CloseBet(res result.Result) float32 {
+	var payout float32 = 0
 	switch res {
 	case result.WIN:
-		p.money += 2 * p.bet
+		payout = 2 * p.bet
 
 	case result.TIE:
-		p.money += p.bet
+		payout = p.bet
+
+	case result.SURRENDER:
+		payout = p.bet / 2
 
 	case result.LOSS:
 		break
 	}
 
-	p.bet = 0
+	p.money += payout
+	return payout
+}
+
+// Double the player's bet
+func (p *Player) DoubleBet() {
+	p.money -= p.bet
+	p.bet *= 2
+	p.action = DOUBLE
+}
+
+// Surrender the current hand
+func (p *Player) Surrender() {
+	p.action = SURRENDER
 }
 
 // Get the current bet of the player
@@ -94,9 +114,9 @@ func (p *Player) GetName() string {
 }
 
 // Make the player hit the deck
-func (p *Player) PlayerHit(dlr *dealer.Dealer) {
+func (p *Player) PlayerHit(dlr *dealer.Dealer, isUp bool) {
 	if !p.Hand.IsBust() && !p.Hand.IsBlackjack() {
-		p.Hand.AddCard(dlr.DealCard(), false)
+		p.Hand.AddCard(dlr.DealCard(), isUp)
 		p.action = HIT
 	} else {
 		p.action = STAND
@@ -111,4 +131,8 @@ func (p *Player) PlayerStand() {
 // Get the current action the player is taking
 func (p *Player) GetPlayerAction() PlayerAction {
 	return p.action
+}
+
+func (p *Player) ResetHand() {
+	p.Hand = cards.NewHand()
 }

@@ -46,6 +46,10 @@ func (h *Hand) GetFirstCard() Card {
 // Add a card to the given hand
 func (h *Hand) AddCard(card Card, isUp bool) {
 	h.cards = append(h.cards, card)
+	//Make the card count as 1 if the deck will bust due to an ace
+	if card.Symbol == int(CARD_ACE) && (h.total+11) > Blackjack {
+		card.Value = 1
+	}
 	h.total += card.Value
 	h.isFaceUp = append(h.isFaceUp, isUp)
 }
@@ -55,12 +59,19 @@ func (h *Hand) GetCards() []Card {
 	return h.cards
 }
 
+// Set all cards to up at the end of the game
 func (h *Hand) SetUp() {
 	for i := 0; i < len(h.isFaceUp); i++ {
 		h.isFaceUp[i] = true
 	}
 }
 
+// Set the first card to show
+func (h *Hand) SetFirstUp() {
+	h.isFaceUp[0] = true
+}
+
+// Get the up status of each card
 func (h *Hand) GetFaceUp() []bool {
 	return h.isFaceUp
 }

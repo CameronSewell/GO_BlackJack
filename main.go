@@ -1,9 +1,11 @@
 package main
 
 import (
-	"main/gui"
+	"fmt"
+	"main/game"
 )
 
 func main() {
-	gui.StartScreen()
+	fmt.Println("Starting Blackjack game")
+	game.LaunchGame()
 }
