@@ -22,7 +22,7 @@ func StartScreen() {
 	startButton := widget.NewButton("Start Game", func() {
 		log.Println("start button tapped")
 
-		difficultySelector := widget.NewLabel("Select the aggressiveness of the AI Dealer: ")
+		difficultySelector := widget.NewLabel("Select the aggressiveness of the AI Player: ")
 
 		radio := widget.NewRadioGroup([]string{"Mild", "Moderate", "Aggressive"}, func(value string) {
 
