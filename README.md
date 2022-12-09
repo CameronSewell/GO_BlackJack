@@ -22,6 +22,8 @@ We all enjoyed working with Go and would work with it again.
 
 ## Compiling and Using
 
+Make sure to download Go and gcc (for the GUI) if you haven't already and link both in the path variable of whatever OS you're using. 
+
 We recommend cloning this repository using this command in your terminal:
 
 git clone git@github.com:CameronSewell/GO_BlackJack.git
